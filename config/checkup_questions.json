@@ -1,0 +1,27 @@
+{
+  "whatsapp": [
+    "Seu WhatsApp tem backup automático?",
+    "Você tem 2FA ativado?",
+    "Já clicou em link suspeito?"
+  ],
+  "pix": [
+    "Você sabe os riscos de transferência?",
+    "Suas chaves PIX estão públicas?",
+    "Conhece o golpe de falsa transferência?"
+  ],
+  "senhas": [
+    "Você repete muitas senhas?",
+    "Suas senhas têm 12+ caracteres?",
+    "Usa gerenciador de senhas?"
+  ],
+  "email": [
+    "Seu email vazou em algum lugar?",
+    "Você tem 2FA no email?",
+    "Recuperação de conta configurada?"
+  ],
+  "redes_sociais": [
+    "Seu perfil é público?",
+    "Faz check-in com localização?",
+    "Dados pessoais expostos?"
+  ]
+}
