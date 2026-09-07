@@ -15,6 +15,7 @@ from handlers.fase2 import handle_fase2
 from handlers.fase4 import handle_fase4
 from handlers.fase5 import registrar_handlers_fase5, apresentar_oferta
 from integracao.scheduler import iniciar_scheduler
+from integracao.coleta_publica import executar_coleta_completa
 from webhooks.telegram_webhook import handle_webhook_telegram
 from webhooks.mercadopago_webhook import handle_webhook_mercadopago
 
@@ -80,6 +81,20 @@ async def health():
 async def test_fase5(usuario_id: str, score: int = 85):
     await apresentar_oferta(usuario_id, score, tg_app.bot)
     return {"ok": True}
+
+
+# ─────────────────────────────────────────────────────────
+# ROTA TEMPORÁRIA DE TESTE — remover depois de validar Coleta Pública
+# ─────────────────────────────────────────────────────────
+
+@app.get("/admin/test-coleta")
+async def test_coleta():
+    """
+    Dispara a coleta pública (RSS + API + Scraping) manualmente,
+    sem esperar o scheduler (6h). Útil pra validar antes do deploy.
+    """
+    resumo = await executar_coleta_completa()
+    return {"ok": True, "resumo": resumo}
 
 
 # ─────────────────────────────────────────────────────────
