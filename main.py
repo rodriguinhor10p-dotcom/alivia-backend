@@ -13,7 +13,7 @@ from handlers.comandos import start_command, help_command
 from handlers.fase1 import handle_fase1
 from handlers.fase2 import handle_fase2
 from handlers.fase4 import handle_fase4
-from handlers.fase5 import registrar_handlers_fase5
+from handlers.fase5 import registrar_handlers_fase5, apresentar_oferta
 from integracao.scheduler import iniciar_scheduler
 from webhooks.telegram_webhook import handle_webhook_telegram
 from webhooks.mercadopago_webhook import handle_webhook_mercadopago
@@ -70,6 +70,16 @@ async def webhook_mercadopago(payload: dict):
 @app.get("/health")
 async def health():
     return {"status": "ok", "service": "ALÍVIA™"}
+
+
+# ─────────────────────────────────────────────────────────
+# ROTA TEMPORÁRIA DE TESTE — remover depois de validar Fase 5
+# ─────────────────────────────────────────────────────────
+
+@app.get("/admin/test-fase5")
+async def test_fase5(usuario_id: str, score: int = 85):
+    await apresentar_oferta(usuario_id, score, tg_app.bot)
+    return {"ok": True}
 
 
 # ─────────────────────────────────────────────────────────
