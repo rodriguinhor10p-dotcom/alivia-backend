@@ -4,7 +4,8 @@ Entrypoint: dispatcher de mensagens + rotas FastAPI + startup.
 Toda a lógica de negócio vive em handlers/, integracao/ e webhooks/.
 """
 
-from fastapi import FastAPI
+import os
+from fastapi import FastAPI, HTTPException, Header
 from telegram import Update
 from telegram.ext import CommandHandler, MessageHandler, filters, ContextTypes
 
@@ -20,6 +21,8 @@ from webhooks.telegram_webhook import handle_webhook_telegram
 from webhooks.mercadopago_webhook import handle_webhook_mercadopago
 
 app = FastAPI(title="ALÍVIA™ Backend")
+
+ADMIN_SECRET = os.getenv("ADMIN_SECRET", "")
 
 
 # ─────────────────────────────────────────────────────────
@@ -88,11 +91,15 @@ async def test_fase5(usuario_id: str, score: int = 85):
 # ─────────────────────────────────────────────────────────
 
 @app.get("/admin/test-coleta")
-async def test_coleta():
+async def test_coleta(x_admin_key: str = Header(None)):
     """
     Dispara a coleta pública (RSS + API + Scraping) manualmente,
     sem esperar o scheduler (6h). Útil pra validar antes do deploy.
+    Protegida por header X-Admin-Key (ver ADMIN_SECRET no .env / Railway Variables).
     """
+    if not ADMIN_SECRET or x_admin_key != ADMIN_SECRET:
+        raise HTTPException(status_code=403, detail="Não autorizado")
+
     resumo = await executar_coleta_completa()
     return {"ok": True, "resumo": resumo}
 
