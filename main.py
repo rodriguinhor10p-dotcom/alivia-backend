@@ -34,7 +34,8 @@ async def message_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("Manda /start pra começarmos 🙂")
         return
 
-    fase = usuario_doc.get("fase_atual", 1)
+    dados = usuario_doc.to_dict()
+fase = dados.get("fase_atual", 1) if dados else 1
     resposta = None
 
     if fase == 1:
