@@ -19,8 +19,8 @@ MP_ACCESS_TOKEN = os.getenv("MERCADOPAGO_ACCESS_TOKEN")
 sdk = mercadopago.SDK(MP_ACCESS_TOKEN)
 
 PLANOS = {
-    "mensal": {"nome": "ALÍVIA Proteção Mensal", "preco": 9.90, "dias": 30},
-    "anual": {"nome": "ALÍVIA Proteção Anual", "preco": 89.90, "dias": 365},
+    "mensal": {"nome": "ALÍVIA Proteção Mensal", "preco": 7.90, "dias": 30},
+    "anual": {"nome": "ALÍVIA Proteção Anual", "preco": 79.00, "dias": 365},
 }
 
 
@@ -30,7 +30,8 @@ PLANOS = {
 
 async def apresentar_oferta(usuario_id: str, score: int, bot):
     usuario_doc = get_usuario(usuario_id)
-    nome = usuario_doc.get("nome") or ""
+    dados = usuario_doc.to_dict() or {}
+    nome = dados.get("nome") or ""
 
     texto = (
         f"{nome}, com {score}% de segurança, você já está à frente da maioria — "
@@ -40,12 +41,12 @@ async def apresentar_oferta(usuario_id: str, score: int, bot):
         f"✅ Alertas de golpes na sua região em tempo real\n"
         f"✅ Checkup mensal automático\n"
         f"✅ Suporte direto quando cair em algo suspeito\n\n"
-        f"Por R$9,90/mês. Cancela quando quiser."
+        f"Por R$7,90/mês. Cancela quando quiser."
     )
 
     keyboard = InlineKeyboardMarkup([
-        [InlineKeyboardButton("Quero proteção — Mensal R$9,90", callback_data="plano_mensal")],
-        [InlineKeyboardButton("Anual R$89,90 (economize 25%)", callback_data="plano_anual")],
+        [InlineKeyboardButton("Quero proteção — Mensal R$7,90", callback_data="plano_mensal")],
+        [InlineKeyboardButton("Anual R$79,00 (economize 17%)", callback_data="plano_anual")],
         [InlineKeyboardButton("Agora não", callback_data="plano_recusar")],
     ])
 
@@ -101,7 +102,8 @@ async def callback_pagamento_pix(update: Update, context: ContextTypes.DEFAULT_T
     plano = PLANOS[plano_id]
 
     usuario_doc = get_usuario(usuario_id)
-    email = usuario_doc.get("email") or f"{usuario_id}@alivia.temp"
+    dados = usuario_doc.to_dict() or {}
+    email = dados.get("email") or f"{usuario_id}@alivia.temp"
 
     payment_data = {
         "transaction_amount": plano["preco"],
