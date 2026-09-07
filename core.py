@@ -6,6 +6,7 @@ pra evitar import circular.
 """
 
 import os
+import json
 import firebase_admin
 from firebase_admin import credentials, firestore
 from telegram.ext import Application
@@ -17,7 +18,18 @@ load_dotenv()
 # FIREBASE
 # ─────────────────────────────────────────────────────────
 
-cred = credentials.Certificate(os.getenv("FIREBASE_CREDENTIALS_PATH", "firebase-key.json"))
+# Tenta ler do ambiente (Railway) primeiro, depois do arquivo local
+firebase_credentials_json = os.getenv("FIREBASE_CREDENTIALS_JSON")
+
+if firebase_credentials_json:
+    # Variável de ambiente com JSON stringificado (Railway)
+    cred_dict = json.loads(firebase_credentials_json)
+    cred = credentials.Certificate(cred_dict)
+else:
+    # Arquivo local (desenvolvimento)
+    cred_path = os.getenv("FIREBASE_CREDENTIALS_PATH", "firebase-key.json")
+    cred = credentials.Certificate(cred_path)
+
 firebase_admin.initialize_app(cred)
 db = firestore.client()
 
@@ -27,6 +39,7 @@ db = firestore.client()
 
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
 tg_app = Application.builder().token(TELEGRAM_TOKEN).job_queue(None).build()
+
 # ─────────────────────────────────────────────────────────
 # HELPERS FIRESTORE
 # ─────────────────────────────────────────────────────────
