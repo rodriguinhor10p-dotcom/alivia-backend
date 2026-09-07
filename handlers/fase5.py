@@ -116,6 +116,7 @@ async def callback_pagamento_pix(update: Update, context: ContextTypes.DEFAULT_T
 
     result = sdk.payment().create(payment_data)
     payment = result["response"]
+    print("MP RESPONSE:", result)
 
     qr_code_base64 = payment["point_of_interaction"]["transaction_data"]["qr_code_base64"]
     qr_code_copia_cola = payment["point_of_interaction"]["transaction_data"]["qr_code"]
