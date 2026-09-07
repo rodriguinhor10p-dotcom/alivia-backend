@@ -15,7 +15,8 @@ CAMPOS = ["conhecia_pessoa", "clicou_link", "compartilhou_dados", "tempo_recebeu
 
 
 async def handle_fase2(usuario_id: str, texto: str, usuario_doc) -> str:
-    step = usuario_doc.get("investigacao_step") or 0
+    dados = usuario_doc.to_dict() or {}
+    step = dados.get("investigacao_step") or 0
 
     if step == 0:
         update_usuario(usuario_id, {"investigacao_step": 1, "mensagem_descrita": texto})
@@ -30,7 +31,7 @@ async def handle_fase2(usuario_id: str, texto: str, usuario_doc) -> str:
             return PERGUNTAS[step]
 
         # última pergunta respondida → validar com THREAT RADAR™
-        mensagem = usuario_doc.get("mensagem_descrita", "")
+        mensagem = dados.get("mensagem_descrita", "")
         score = await validar_threat_radar(mensagem)
 
         update_usuario(usuario_id, {
