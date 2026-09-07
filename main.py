@@ -35,7 +35,7 @@ async def message_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     dados = usuario_doc.to_dict()
-fase = dados.get("fase_atual", 1) if dados else 1
+    fase = dados.get("fase_atual", 1) if dados else 1
     resposta = None
 
     if fase == 1:
