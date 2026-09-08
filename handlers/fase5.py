@@ -198,6 +198,7 @@ async def processar_webhook_mp(payload: dict):
         "pagamento_status": "aprovado",
         "pagamento_confirmado_em": firestore.SERVER_TIMESTAMP,
         "fase_atual": 6,
+        "data_entrada_fase6": firestore.SERVER_TIMESTAMP,
     })
 
     await enviar_boas_vindas_assinante(usuario_id)
