@@ -10,7 +10,7 @@ from telegram import Update
 from telegram.ext import CommandHandler, MessageHandler, filters, ContextTypes
 
 from core import tg_app, get_usuario, log_conversa
-from handlers.comandos import start_command, help_command
+from handlers.comandos import start_command, help_command, convidar_command
 from handlers.fase1 import handle_fase1
 from handlers.fase2 import handle_fase2
 from handlers.fase4 import handle_fase4
@@ -93,11 +93,6 @@ async def test_fase5(usuario_id: str, score: int = 85):
 
 @app.get("/admin/test-coleta")
 async def test_coleta(x_admin_key: str = Header(None)):
-    """
-    Dispara a coleta pública (RSS + API + Scraping) manualmente,
-    sem esperar o scheduler (6h). Útil pra validar antes do deploy.
-    Protegida por header X-Admin-Key (ver ADMIN_SECRET no .env / Railway Variables).
-    """
     if not ADMIN_SECRET or x_admin_key != ADMIN_SECRET:
         raise HTTPException(status_code=403, detail="Não autorizado")
 
@@ -111,12 +106,6 @@ async def test_coleta(x_admin_key: str = Header(None)):
 
 @app.get("/admin/test-reclameaqui")
 async def test_reclameaqui(x_admin_key: str = Header(None), limite_empresas: int = 5):
-    """
-    Dispara a coleta do Reclame Aqui (via Apify) manualmente,
-    sem esperar o scheduler. Útil pra ver o JSON real que a Apify
-    devolve e ajustar o parsing em _extrair_campos() se necessário.
-    Protegida por header X-Admin-Key (ver ADMIN_SECRET no .env / Railway Variables).
-    """
     if not ADMIN_SECRET or x_admin_key != ADMIN_SECRET:
         raise HTTPException(status_code=403, detail="Não autorizado")
 
@@ -134,6 +123,7 @@ async def startup():
 
     tg_app.add_handler(CommandHandler("start", start_command))
     tg_app.add_handler(CommandHandler("help", help_command))
+    tg_app.add_handler(CommandHandler("convidar", convidar_command))
     tg_app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, message_handler))
     registrar_handlers_fase5(tg_app)
 

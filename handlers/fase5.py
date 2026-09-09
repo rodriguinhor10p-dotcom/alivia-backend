@@ -14,6 +14,7 @@ from telegram.ext import ContextTypes, CallbackQueryHandler
 from firebase_admin import firestore
 
 from core import db, update_usuario, get_usuario
+from integracao.afiliados import registrar_conversao_afiliado, notificar_referenciador
 
 MP_ACCESS_TOKEN = os.getenv("MERCADOPAGO_ACCESS_TOKEN")
 sdk = mercadopago.SDK(MP_ACCESS_TOKEN)
@@ -202,6 +203,17 @@ async def processar_webhook_mp(payload: dict):
     })
 
     await enviar_boas_vindas_assinante(usuario_id)
+
+    # ── Programa de Afiliados ──
+    # Se o usuário veio de indicação, registra a comissão (25% do valor
+    # pago) e notifica quem indicou.
+    conversao = await registrar_conversao_afiliado(usuario_id, plano["preco"])
+    if conversao:
+        await notificar_referenciador(
+            conversao["referenciador_id"],
+            conversao["comissao_recebida"],
+        )
+
     return {"ok": True, "status": "approved"}
 
 
