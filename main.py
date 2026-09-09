@@ -17,6 +17,7 @@ from handlers.fase4 import handle_fase4
 from handlers.fase5 import registrar_handlers_fase5, apresentar_oferta
 from integracao.scheduler import iniciar_scheduler
 from integracao.coleta_publica import executar_coleta_completa
+from integracao.coleta_reclameaqui import coleta_reclameaqui_completa
 from webhooks.telegram_webhook import handle_webhook_telegram
 from webhooks.mercadopago_webhook import handle_webhook_mercadopago
 
@@ -102,6 +103,25 @@ async def test_coleta(x_admin_key: str = Header(None)):
 
     resumo = await executar_coleta_completa()
     return {"ok": True, "resumo": resumo}
+
+
+# ─────────────────────────────────────────────────────────
+# ROTA TEMPORÁRIA DE TESTE — remover depois de validar Reclame Aqui
+# ─────────────────────────────────────────────────────────
+
+@app.get("/admin/test-reclameaqui")
+async def test_reclameaqui(x_admin_key: str = Header(None), limite_empresas: int = 5):
+    """
+    Dispara a coleta do Reclame Aqui (via Apify) manualmente,
+    sem esperar o scheduler. Útil pra ver o JSON real que a Apify
+    devolve e ajustar o parsing em _extrair_campos() se necessário.
+    Protegida por header X-Admin-Key (ver ADMIN_SECRET no .env / Railway Variables).
+    """
+    if not ADMIN_SECRET or x_admin_key != ADMIN_SECRET:
+        raise HTTPException(status_code=403, detail="Não autorizado")
+
+    novos = await coleta_reclameaqui_completa(limite_empresas=limite_empresas)
+    return {"ok": True, "novos_registros": novos}
 
 
 # ─────────────────────────────────────────────────────────

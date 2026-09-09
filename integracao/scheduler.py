@@ -21,6 +21,7 @@ from integracao.coleta_publica import (
     atualizar_mapa_risco,
     gerar_boletim_diario,
 )
+from integracao.coleta_reclameaqui import coleta_reclameaqui_completa
 
 logger = logging.getLogger(__name__)
 
@@ -107,6 +108,21 @@ def scheduled_coleta_publica():
         logger.error(f"❌ Erro no job de coleta pública: {str(e)}")
 
 
+def scheduled_coleta_reclameaqui():
+    """
+    Job 1x/dia: consulta o Reclame Aqui (via Apify) pras empresas mais
+    mencionadas pelos usuários. Roda diariamente (não a cada 6h) pra
+    controlar custo — a Apify cobra por evento (~$10/1.000 registros).
+    """
+    logger.info("⏰ Scheduler: iniciando coleta Reclame Aqui (diária)")
+
+    try:
+        novos = asyncio.run(coleta_reclameaqui_completa())
+        logger.info(f"✅ Coleta Reclame Aqui: {novos} reclamações novas salvas")
+    except Exception as e:
+        logger.error(f"❌ Erro no job de coleta Reclame Aqui: {str(e)}")
+
+
 def scheduled_boletim_diario():
     """Job 1x/dia (6 AM): gera o Boletim Diário com top 10 alertas."""
     logger.info("⏰ Scheduler: gerando boletim diário")
@@ -128,11 +144,15 @@ def iniciar_scheduler():
     # Coleta Pública — 17 portais (RSS agora, API/Scraping depois)
     scheduler.add_job(scheduled_coleta_publica, "interval", hours=6)
 
+    # Reclame Aqui (Apify) — diário, 7h da manhã (controle de custo)
+    scheduler.add_job(scheduled_coleta_reclameaqui, "cron", hour=7, minute=0)
+
     # Boletim Diário — 6h da manhã, todo dia
     scheduler.add_job(scheduled_boletim_diario, "cron", hour=6, minute=0)
 
     scheduler.start()
     logger.info(
         "✅ Scheduler iniciado: educação (6h) + retenção fase6 (6h) + "
-        "churn prevention (6h) + coleta pública (6h) + boletim (diário 6h)"
+        "churn prevention (6h) + coleta pública (6h) + reclame aqui (diário 7h) + "
+        "boletim (diário 6h)"
     )
